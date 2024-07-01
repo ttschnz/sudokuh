@@ -164,7 +164,7 @@ const sudokuh = {
      * @return {Promise<{sudoku:Number[][],solution:Number[][]}>}
     */
    get_sudoku_9by9: async ()=>{
-       let [sudoku, solution] = JSON.parse(await wasm_sudokuh__WEBPACK_IMPORTED_MODULE_0__["get_sudoku_9by9"]());
+       let [sudoku, solution] = JSON.parse(await wasm["get_sudoku_9by9"]());
        return {sudoku, solution}
    }
 };
