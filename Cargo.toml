@@ -1,5 +1,5 @@
 [package]
-name = "sudokuh-v2"
+name = "sudokuh"
 version = "0.1.0"
 authors = ["Tim T. <tim@mw3.ch>"]
 edition = "2018"
