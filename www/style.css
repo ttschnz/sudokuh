@@ -1,0 +1,213 @@
+body{
+    margin: 0;
+}
+main{
+    height: 100vh;
+    width: 100vw;
+}
+
+main[data-state="loading"]{
+    background-color: #333;
+}
+main[data-state="loading"] * {
+    display: none;
+}
+main[data-state="loading"]::before{
+    content: "";
+    position: absolute;
+    top:50%;
+    left:50%;
+    translate: -50% -50%;
+    height: 50px;
+    border-radius: 50%;
+    aspect-ratio: 1;
+    border: 5px solid white;
+    border-left:5px solid transparent;
+    animation: rotate 1s infinite linear;
+}
+main[data-state="ready"]{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: min(10vh, 10vw);
+    box-sizing: border-box;
+    justify-content: space-around;
+    gap:20px;
+}
+main[data-solved=true] {
+    background-color: #64c771;
+}
+main[data-solved=true] .field{
+    box-shadow: none;
+    background-color: white;
+}
+
+@keyframes rotate{
+    0%{
+        rotate: 0deg;
+    }
+    100%{
+        rotate: 360deg;
+    }
+}
+
+
+.sudoku_grid{
+    display: grid;
+    --gap_size: 8px;
+    grid-template-rows: repeat(3, 1fr) var(--gap_size) repeat(3, 1fr) var(--gap_size) repeat(3, 1fr);
+    grid-template-columns: repeat(3, 1fr) var(--gap_size) repeat(3, 1fr) var(--gap_size) repeat(3, 1fr);
+    height: min(80vh, 80vw);
+    aspect-ratio: 1;
+    gap: var(--gap_size);
+}
+
+.field {
+    border-radius: 10px;
+    box-shadow: 3px 5px 8px 2px #dddddd;
+}
+.field[data-constant=true]{
+    background-color: rgb(229 229 229);
+}
+
+.field:not(*[data-field_value="0"]){
+    background-size: 85%;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+.field[data-field_value="1"]{
+    background-image: url("/1.png");
+}
+.field[data-field_value="2"]{
+    background-image: url("/2.png");
+}
+.field[data-field_value="3"]{
+    background-image: url("/3.png");
+}
+.field[data-field_value="4"]{
+    background-image: url("/4.png");
+}
+.field[data-field_value="5"]{
+    background-image: url("/5.png");
+}
+.field[data-field_value="6"]{
+    background-image: url("/6.png");
+}
+.field[data-field_value="7"]{
+    background-image: url("/7.png");
+}
+.field[data-field_value="8"]{
+    background-image: url("/8.png");
+}
+.field[data-field_value="9"]{
+    background-image: url("/9.png");
+}
+
+
+
+.buttons{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 5px;
+}
+
+button {
+    appearance: button;
+    border: solid transparent;
+    border-radius: 16px;
+    border-width: 0 0 4px;
+    box-sizing: border-box;
+    color: #FFFFFF;
+    cursor: pointer;
+    display: inline-block;
+    font-family: din-round,sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: .8px;
+    line-height: 20px;
+    margin: 0;
+    outline: none;
+    overflow: visible;
+    padding: 13px 16px;
+    text-align: center;
+    text-transform: uppercase;
+    touch-action: manipulation;
+    transform: translateZ(0);
+    transition: filter .2s;
+    user-select: none;
+    -webkit-user-select: none;
+    vertical-align: middle;
+    white-space: nowrap;
+    width: 100%;
+}
+
+button:after {
+    background-clip: padding-box;
+    border: solid transparent;
+    border-radius: 16px;
+    border-width: 0 0 4px;
+    bottom: -4px;
+    content: "";
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: -1;
+}
+
+
+button:main,
+button:focus {
+    user-select: auto;
+}
+
+button:hover:not(:disabled) {
+    filter: brightness(1.1);
+-webkit-filter: brightness(1.1);
+}
+
+button:disabled {
+    cursor: auto;
+}
+
+button:disabled::after {
+    display: none;
+}
+
+button:active {
+    border-width: 4px 0 0;
+    background: none;
+}
+
+
+button.generate_sudoku {
+    background-color: #1899D6;
+}
+
+button.generate_sudoku:after {
+    background-color: #1CB0F6;
+}
+
+button.verify {
+    background-color: #1899D6;
+}
+
+button.verify:after {
+    background-color: #1CB0F6;
+}
+
+@media only screen and (max-width:600px) {
+    main[data-state="ready"]{
+        padding: min(2vh, 2vw);
+    }       
+    .sudoku_grid{
+        --gap_size: 2px;
+        height: min(98vh, 98vw);
+    }
+    .field{
+        background-size: contain;
+        box-shadow: none;
+
+    }
+}
