@@ -32,7 +32,7 @@ main[data-state="ready"]{
     padding: min(10vh, 10vw);
     box-sizing: border-box;
     justify-content: space-around;
-    gap:20px;
+    gap:60px;
 }
 main[data-solved=true] {
     background-color: #64c771;
@@ -138,6 +138,7 @@ main.feedback-incorrect .sudoku_grid {
     flex-direction: column;
     width: 100%;
     gap: 5px;
+    position: relative;
 }
 
 button {
@@ -209,12 +210,20 @@ button:active {
 }
 
 
-button.generate_sudoku {
+button.generate_sudoku, button.hint {
     background-color: #1899D6;
 }
 
-button.generate_sudoku:after {
+button.generate_sudoku:after, button.hint::after {
     background-color: #1CB0F6;
+}
+
+button.hint {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 50px;
+    translate: 0 -55px;
 }
 
 button.verify {

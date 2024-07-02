@@ -3,36 +3,101 @@ window.wasm = wasm;
 
 const sudokuh = {
     _main: document.querySelector("main"),
+    /**
+     * @type {HTMLDivElement | null}
+     */
+    buttons: null,
+    /**
+     * @type {HTMLButtonElement | null}
+     */
+    generate_button: null,
+    storage: {
+        /**
+         * Saves a sudoku as the current generated sudoku. This clears the saved state.
+         * @param {{sudoku:Number[][],solution:Number[][]}} data
+         */
+        save_sudoku: (data) => {
+            window.localStorage["sudoku_data"] = JSON.stringify(data);
+            window.localStorage["sudoku_state"] = null;
+        },
+        /**
+         * overwrites the current state.
+         */
+        save_state: () => {
+            let state = sudokuh.get_current();
+            window.localStorage["sudoku_state"] = JSON.stringify(state);
+        },
+        /**
+         * loads the last state and sudoku if available.
+         * @returns {Number[][]}
+         */
+        load_sudoku: () => {
+            let data = window.localStorage["sudoku_data"];
+            if (data == null) return;
+            /**
+             * @type {{sudoku:Number[][],solution:Number[][]}}
+             */
+            let { sudoku, solution } = JSON.parse(data);
+
+            let state_string = window.localStorage["sudoku_state"];
+            /**
+             * @type {Number[][] | null}
+             */
+            let state;
+            if (state_string != null) state = JSON.parse(state_string);
+
+            sudokuh.sudoku_ready({ sudoku, solution });
+
+            if (state != null) {
+                for (let row in state) {
+                    for (let column in state[row]) {
+                        let field = sudokuh._main.querySelector(
+                            `.field[data-coords="${row}/${column}"]`
+                        );
+                        if (field == null) continue;
+
+                        field.dataset["field_value"] = state[row][column];
+                    }
+                }
+            }
+        },
+    },
     init: () => {
         if (sudokuh._main != null) {
             let _main = sudokuh._main;
 
-            let _buttons = document.createElement("div");
-            _buttons.classList.add("buttons");
-            _main.appendChild(_buttons);
+            let buttons = document.createElement("div");
+            buttons.classList.add("buttons");
+            _main.appendChild(buttons);
+            sudokuh.buttons = buttons;
 
             let generate_button = document.createElement("button");
             generate_button.innerText = "New Sudo🐮";
             generate_button.classList.add("generate_sudoku");
             generate_button.addEventListener("click", async () => {
-                _main.style.setProperty("--data-img", `url("${Math.round(Math.random()*8)+1}.png")`);
+                _main.style.setProperty(
+                    "--data-img",
+                    `url("${Math.round(Math.random() * 8) + 1}.png")`
+                );
                 // instant feedback: generate empty field
                 sudokuh.draw_sudoku_field(
-                    new Array(9).fill(new Array(9).fill(0)), true
+                    new Array(9).fill(new Array(9).fill(0)),
+                    true
                 );
-                
+
                 _main.dataset["solved"] = false;
                 generate_button.disabled = true;
 
                 // generate sudoku with little delay to allow rendering
                 setTimeout(async () => {
                     let data = await sudokuh.get_sudoku_9by9();
-                    window.localStorage["last_sudoku"] = JSON.stringify(data);
-                    sudokuh.sudoku_ready(data, generate_button, _buttons);
+                    sudokuh.storage.save_sudoku(data);
+                    sudokuh.sudoku_ready(data);
                 }, 50);
             });
 
-            _buttons.appendChild(generate_button);
+            buttons.appendChild(generate_button);
+            sudokuh.generate_button = generate_button;
 
             // prefetch cows
             for (let i = 1; i <= 9; i++) {
@@ -49,11 +114,8 @@ const sudokuh = {
 
             _main.dataset["state"] = "ready";
 
-            // check if there is a sudoku saved
-            if (window.localStorage["last_sudoku"] != null) {
-                let data = JSON.parse(window.localStorage["last_sudoku"]);
-                sudokuh.sudoku_ready(data, generate_button, _buttons);
-            }
+            // load last sudoku (if available)
+            sudokuh.storage.load_sudoku();
         }
     },
 
@@ -63,16 +125,12 @@ const sudokuh = {
      * @param {HTMLButtonElement} generate_button
      * @param {HTMLDivElement} _buttons
      */
-    sudoku_ready: (data, generate_button, _buttons) => {
+    sudoku_ready: (data) => {
         let _main = sudokuh._main;
-        // callback to remove verify when generating a new one
-        let remove_verify = () => {
-            verify_button.outerHTML = "";
-        };
 
         // draw the sudoku
         sudokuh.draw_sudoku_field(data.sudoku, false);
-        generate_button.disabled = false;
+        sudokuh.generate_button.disabled = false;
 
         // add verify button
         let verify_button = document.createElement("button");
@@ -89,24 +147,24 @@ const sudokuh = {
             );
             if (correct) {
                 _main.dataset["solved"] = true;
-                remove_verify();
-                generate_button.removeEventListener("click", remove_verify);
+                remove_buttons();
+                sudokuh.generate_button.removeEventListener(
+                    "click",
+                    remove_buttons
+                );
                 window.localStorage["last_sudoku"] = null;
-            }else{
+            } else {
                 _main.classList.add("feedback-incorrect");
-                setTimeout(()=>{
+                setTimeout(() => {
                     _main.classList.remove("feedback-incorrect");
                 }, 250);
             }
         });
-        _buttons.appendChild(verify_button);
-        generate_button.addEventListener("click", remove_verify, {
-            once: true,
-        });
+        sudokuh.buttons.appendChild(verify_button);
 
         // hints
         let add_hint = (evt) => {
-            if (evt.key == "h") {
+            if ((evt.type == "keypress" && evt.key == "h") || evt.type == "click") {
                 /** @type {{row:Number, column: Number, value: Number}[]} */
                 let hint_candidates = new Array();
 
@@ -134,18 +192,37 @@ const sudokuh = {
                     hint_candidates[
                         Math.floor(Math.random() * (hint_candidates.length - 1))
                     ];
-                let field =
-                    _main.querySelectorAll(".field")[
-                        hint.row * 9 + hint.column
-                    ];
+
+                let field = _main.querySelector(
+                    `.field[data-coords="${hint.row}/${hint.column}"`
+                );
 
                 field.dataset["field_value"] = hint.value;
                 field.dataset["constant"] = true;
+
+                data.sudoku[hint.row][hint.column] = hint.value;
+                sudokuh.storage.save_sudoku(data);
+                sudokuh.storage.save_state();
             }
         };
+        let hint_button = document.createElement("button");
+        hint_button.innerText = "h";
+        hint_button.title = "Show a hint";
+        hint_button.classList.add("hint");
+        hint_button.addEventListener("click", add_hint);
+        sudokuh.buttons.appendChild(hint_button);
+        // shortcut: h
         document.addEventListener("keypress", add_hint);
-        generate_button.addEventListener("click", () => {
+        sudokuh.generate_button.addEventListener("click", () => {
             document.removeEventListener("keypress", add_hint);
+        });
+        // callback to remove buttons
+        let remove_buttons = () => {
+            verify_button.outerHTML = "";
+            hint_button.outerHTML = "";
+        };
+        sudokuh.generate_button.addEventListener("click", remove_buttons, {
+            once: true,
         });
     },
 
@@ -182,12 +259,12 @@ const sudokuh = {
             grid.classList.add(class_name);
             _main.insertBefore(grid, _main.firstElementChild);
         }
-        if(empty_field){
+        if (empty_field) {
             grid.classList.add("empty");
-        }else{
+        } else {
             grid.classList.remove("empty");
         }
-        
+
         let gap = document.createElement("div");
         gap.classList.add("gap");
 
@@ -213,6 +290,7 @@ const sudokuh = {
                         if (_main.dataset["solved"] != "true") {
                             field.dataset["field_value"] =
                                 (Number(field.dataset["field_value"]) + 1) % 10;
+                            sudokuh.storage.save_state();
                         }
                     });
                 }
