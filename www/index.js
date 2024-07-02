@@ -16,65 +16,17 @@ const sudokuh = {
             generate_button.innerText = "New Sudo🐮";
             generate_button.classList.add("generate_sudoku")
             generate_button.addEventListener("click", async ()=>{
-                let remove_verify= ()=>{verify_button.outerHTML =""};
-
                 // instant feedback: generate empty field
-                sudokuh.draw_sudoku(new Array(9).fill(new Array(9).fill(0)));
+                sudokuh.draw_sudoku_field(new Array(9).fill(new Array(9).fill(0)));
                 _main.dataset["solved"] = false;
                 generate_button.disabled = true;
 
-                // generate sudoku
-                let data = await sudokuh.get_sudoku_9by9();
-                sudokuh.draw_sudoku(data.sudoku);
-                generate_button.disabled = false;
-                
-                // add verify button
-                let verify_button = document.createElement("button");
-                verify_button.innerText = "Verify";
-                verify_button.classList.add("verify");
-                verify_button.addEventListener("click", ()=>{
-                    let current = sudokuh.get_current();
-                    let solution = data.solution;
-                    let correct = current.every((row, row_index)=>row.every((field, column_index)=>solution[row_index][column_index]==field));
-                    if(correct){
-                        _main.dataset["solved"]=true;
-                        remove_verify();
-                        generate_button.removeEventListener("click",remove_verify);
-                    }
-                });
-                _buttons.appendChild(verify_button);
-                generate_button.addEventListener("click", remove_verify,{once:true});
-
-
-                // hints
-                let add_hint = (evt)=>{
-                    if (evt.key == "h"){
-                        /** @type {{row:Number, column: Number, value: Number}[]} */
-                        let hint_candidates = new Array();
-
-                        let current = sudokuh.get_current();
-                        let solution = data.solution;
-
-                        for (let row_index in current){
-                            for (let column_index in current[row_index]){
-                                if (current[row_index][column_index] != solution[row_index][column_index]){
-                                    hint_candidates.push({row:Number(row_index), column: Number(column_index), value: solution[row_index][column_index]});
-                                }
-                            }
-                        }
-
-                        if (hint_candidates.length == 0)
-                            return
-
-                        let hint = hint_candidates[Math.floor(Math.random()*(hint_candidates.length-1))];
-                        let field = _main.querySelectorAll(".field")[hint.row*9+hint.column];
-
-                        field.dataset["field_value"]=hint.value;
-                        field.dataset["constant"]=true;
-                    }
-                };
-                document.addEventListener("keypress", add_hint);
-                generate_button.addEventListener("click", ()=>{document.removeEventListener("keypress", add_hint)});
+                // generate sudoku with little delay to allow rendering
+                setTimeout(async ()=>{
+                    let data = await sudokuh.get_sudoku_9by9();
+                    window.localStorage["last_sudoku"] = JSON.stringify(data);
+                    sudokuh.sudoku_ready(data, generate_button, _buttons);
+                }, 50);
             });
             
             _buttons.appendChild(generate_button);
@@ -91,7 +43,77 @@ const sudokuh = {
             }
 
             _main.dataset["state"] = "ready";
+
+            // check if there is a sudoku saved
+            if (window.localStorage["last_sudoku"] != null){
+                let data = JSON.parse(window.localStorage["last_sudoku"]);
+                sudokuh.sudoku_ready(data, generate_button, _buttons);
+            }
         }
+    },
+
+    /**
+     * 
+     * @param {{sudoku:Number[][],solution:Number[][]}} data 
+     * @param {HTMLButtonElement} generate_button
+     * @param {HTMLDivElement} _buttons
+     */
+    sudoku_ready:(data, generate_button, _buttons)=>{
+        // callback to remove verify when generating a new one
+        let remove_verify= ()=>{verify_button.outerHTML =""};
+
+        // draw the sudoku
+        sudokuh.draw_sudoku_field(data.sudoku);
+        generate_button.disabled = false;
+        
+        // add verify button
+        let verify_button = document.createElement("button");
+        verify_button.innerText = "Verify";
+        verify_button.classList.add("verify");
+        verify_button.addEventListener("click", ()=>{
+            let current = sudokuh.get_current();
+            let solution = data.solution;
+            let correct = current.every((row, row_index)=>row.every((field, column_index)=>solution[row_index][column_index]==field));
+            if(correct){
+                _main.dataset["solved"]=true;
+                remove_verify();
+                generate_button.removeEventListener("click",remove_verify);
+                window.localStorage["last_sudoku"] = null;
+            }
+        });
+        _buttons.appendChild(verify_button);
+        generate_button.addEventListener("click", remove_verify,{once:true});
+
+
+        // hints
+        let add_hint = (evt)=>{
+            if (evt.key == "h"){
+                /** @type {{row:Number, column: Number, value: Number}[]} */
+                let hint_candidates = new Array();
+
+                let current = sudokuh.get_current();
+                let solution = data.solution;
+
+                for (let row_index in current){
+                    for (let column_index in current[row_index]){
+                        if (current[row_index][column_index] != solution[row_index][column_index]){
+                            hint_candidates.push({row:Number(row_index), column: Number(column_index), value: solution[row_index][column_index]});
+                        }
+                    }
+                }
+
+                if (hint_candidates.length == 0)
+                    return
+
+                let hint = hint_candidates[Math.floor(Math.random()*(hint_candidates.length-1))];
+                let field = _main.querySelectorAll(".field")[hint.row*9+hint.column];
+
+                field.dataset["field_value"]=hint.value;
+                field.dataset["constant"]=true;
+            }
+        };
+        document.addEventListener("keypress", add_hint);
+        generate_button.addEventListener("click", ()=>{document.removeEventListener("keypress", add_hint)});
     },
 
     /**
@@ -116,7 +138,7 @@ const sudokuh = {
     /**
      * @param data {{sudoku:Number[][]}}
      */
-    draw_sudoku: (data)=>{
+    draw_sudoku_field: (data)=>{
         let class_name = "sudoku_grid";
         let _main = sudokuh._main;
         let grid = _main.querySelector(`.${class_name}`);
