@@ -104,31 +104,31 @@ main.feedback-incorrect .sudoku_grid {
     background-position: center;
 }
 .field[data-field_value="1"]{
-    background-image: url("/1.png");
+    background-image: url("/1.webp");
 }
 .field[data-field_value="2"]{
-    background-image: url("/2.png");
+    background-image: url("/2.webp");
 }
 .field[data-field_value="3"]{
-    background-image: url("/3.png");
+    background-image: url("/3.webp");
 }
 .field[data-field_value="4"]{
-    background-image: url("/4.png");
+    background-image: url("/4.webp");
 }
 .field[data-field_value="5"]{
-    background-image: url("/5.png");
+    background-image: url("/5.webp");
 }
 .field[data-field_value="6"]{
-    background-image: url("/6.png");
+    background-image: url("/6.webp");
 }
 .field[data-field_value="7"]{
-    background-image: url("/7.png");
+    background-image: url("/7.webp");
 }
 .field[data-field_value="8"]{
-    background-image: url("/8.png");
+    background-image: url("/8.webp");
 }
 .field[data-field_value="9"]{
-    background-image: url("/9.png");
+    background-image: url("/9.webp");
 }
 
 

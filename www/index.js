@@ -77,7 +77,7 @@ const sudokuh = {
             generate_button.addEventListener("click", async () => {
                 _main.style.setProperty(
                     "--data-img",
-                    `url("${Math.round(Math.random() * 8) + 1}.png")`
+                    `url("${Math.round(Math.random() * 8) + 1}.webp")`
                 );
                 // instant feedback: generate empty field
                 sudokuh.draw_sudoku_field(
@@ -103,7 +103,7 @@ const sudokuh = {
             for (let i = 1; i <= 9; i++) {
                 (async () => {
                     let img = document.createElement("img");
-                    img.src = `/${i}.png`;
+                    img.src = `/${i}.webp`;
                     img.hidden = true;
                     document.body.appendChild(img);
                     img.addEventListener("load", () => {

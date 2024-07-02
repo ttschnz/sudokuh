@@ -9,6 +9,6 @@ module.exports = {
   },
   mode: "development",
   plugins: [
-    new CopyWebpackPlugin(['*.html', '*.css', '*.png'])
+    new CopyWebpackPlugin(['*.html', '*.css', '*.webp'])
   ],
 };
