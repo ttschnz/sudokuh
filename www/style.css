@@ -42,12 +42,28 @@ main[data-solved=true] .field{
     background-color: white;
 }
 
+.sudoku_grid.empty .field[data-coords="4/4"] {
+    background-image: var(--data-img);
+    background-size: contain;
+    background-repeat: no-repeat;
+    animation: jump .5s infinite alternate ease-out;
+}
+
 @keyframes rotate{
     0%{
         rotate: 0deg;
     }
     100%{
         rotate: 360deg;
+    }
+}
+
+@keyframes jump{
+    0%{
+        translate: 0 0;
+    }
+    100%{
+        translate: 0 -30px;
     }
 }
 

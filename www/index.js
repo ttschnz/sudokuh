@@ -15,10 +15,12 @@ const sudokuh = {
             generate_button.innerText = "New Sudo🐮";
             generate_button.classList.add("generate_sudoku");
             generate_button.addEventListener("click", async () => {
+                _main.style.setProperty("--data-img", `url("${Math.round(Math.random()*8)+1}.png")`);
                 // instant feedback: generate empty field
                 sudokuh.draw_sudoku_field(
-                    new Array(9).fill(new Array(9).fill(0))
+                    new Array(9).fill(new Array(9).fill(0)), true
                 );
+                
                 _main.dataset["solved"] = false;
                 generate_button.disabled = true;
 
@@ -68,7 +70,7 @@ const sudokuh = {
         };
 
         // draw the sudoku
-        sudokuh.draw_sudoku_field(data.sudoku);
+        sudokuh.draw_sudoku_field(data.sudoku, false);
         generate_button.disabled = false;
 
         // add verify button
@@ -161,8 +163,9 @@ const sudokuh = {
 
     /**
      * @param data {{sudoku:Number[][]}}
+     * @param empty_field {boolean}
      */
-    draw_sudoku_field: (data) => {
+    draw_sudoku_field: (data, empty_field) => {
         let class_name = "sudoku_grid";
         let _main = sudokuh._main;
         let grid = _main.querySelector(`.${class_name}`);
@@ -173,7 +176,12 @@ const sudokuh = {
             grid.classList.add(class_name);
             _main.insertBefore(grid, _main.firstElementChild);
         }
-
+        if(empty_field){
+            grid.classList.add("empty");
+        }else{
+            grid.classList.remove("empty");
+        }
+        
         let gap = document.createElement("div");
         gap.classList.add("gap");
 
@@ -193,6 +201,7 @@ const sudokuh = {
                 field.classList.add("field");
                 field.dataset["field_value"] = field_value;
                 field.dataset["constant"] = field_value != 0;
+                field.dataset["coords"] = `${row}/${field_index}`;
                 if (field_value == 0) {
                     field.addEventListener("click", () => {
                         if (_main.dataset["solved"] != "true") {
