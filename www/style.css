@@ -60,6 +60,7 @@ main[data-solved=true] .field{
     height: min(80vh, 80vw);
     aspect-ratio: 1;
     gap: var(--gap_size);
+    position: relative;
 }
 
 .field {
@@ -208,6 +209,23 @@ button.verify:after {
     .field{
         background-size: contain;
         box-shadow: none;
-
+    }
+    *:not(.gap)+.gap+.gap::before {
+        content: "";
+        position: absolute;
+        background: darkgrey;
+        left: 1%;
+        width: 98%;
+        height: 2px;
+        border-radius: 1px;
+    }
+    .gap:nth-of-type(7n):not(.gap+.gap)::before {
+        content: "";
+        position: absolute;
+        background: darkgrey;
+        top: 1%;
+        height: 98%;
+        width: 2px;
+        border-radius: 1px;
     }
 }
