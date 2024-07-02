@@ -64,6 +64,7 @@ const sudokuh = {
      * @param {HTMLDivElement} _buttons
      */
     sudoku_ready: (data, generate_button, _buttons) => {
+        let _main = sudokuh._main;
         // callback to remove verify when generating a new one
         let remove_verify = () => {
             verify_button.outerHTML = "";
@@ -91,6 +92,11 @@ const sudokuh = {
                 remove_verify();
                 generate_button.removeEventListener("click", remove_verify);
                 window.localStorage["last_sudoku"] = null;
+            }else{
+                _main.classList.add("feedback-incorrect");
+                setTimeout(()=>{
+                    _main.classList.remove("feedback-incorrect");
+                }, 250);
             }
         });
         _buttons.appendChild(verify_button);

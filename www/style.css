@@ -48,6 +48,9 @@ main[data-solved=true] .field{
     background-repeat: no-repeat;
     animation: jump .5s infinite alternate ease-out;
 }
+main.feedback-incorrect .sudoku_grid {
+    animation: 0.075s linear shake infinite alternate;
+}
 
 @keyframes rotate{
     0%{
@@ -67,6 +70,14 @@ main[data-solved=true] .field{
     }
 }
 
+@keyframes shake{
+    0%{
+        translate: -5px 0;
+    }
+    100%{
+        translate: 5px 0;
+    }
+}
 
 .sudoku_grid{
     display: grid;
@@ -207,11 +218,11 @@ button.generate_sudoku:after {
 }
 
 button.verify {
-    background-color: #1899D6;
+    background-color: hsl(199 2% 43% / 1);
 }
 
 button.verify:after {
-    background-color: #1CB0F6;
+    background-color: hsl(199 17% 66% / 1);
 }
 
 @media only screen and (max-width:600px) {
